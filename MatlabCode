@@ -1,0 +1,56 @@
+
+clear all; clc;
+addpath /Users/dilekbetularslan/Documents/MATLAB/NIfTI_20140122
+A=load_untouch_nii('path.nii');
+MNI=A.img;
+
+% Select Maps registered to MNI Brain Atlas
+path_Patient = uigetdir()
+listing_Patient=dir(path_Patient);
+Patient_foldernumber=size(listing_Patient);
+excel_name=strcat('CBF_registered_Parcellation');
+table_mean=cell(100,101);
+% table_median=cell(100,101);
+% table_std=cell(100,101);
+for line_Patient=4:Patient_foldernumber(:,1)
+    
+    
+    full=[path_Patient '/' listing_Patient(line_Patient).name];
+    
+    B=load_untouch_nii(full);
+    Patient=B.img;
+    table_mean(line_Patient-2,1)={listing_Patient(line_Patient).name};
+%     table_median(line_Patient-2,1)={listing_Patient(line_Patient).name};
+%     table_std(line_Patient-2,1)={listing_Patient(line_Patient).name};
+%     
+    for line=1:100
+        %line=178;
+        MNI=A.img;
+        MNI(find(MNI~=line))=0;
+        MNI(find(MNI>0))=1;
+        ak=double(Patient).*double(MNI);
+        ROI=ak(find(ak>20)); % threshold
+        
+        table_mean(1,line+1)={line};
+%         table_median(1,line+1)={line};
+%         table_std(1,line+1)={line};
+        if length(ROI)>(floor(length(MNI(find(MNI>0))).*(30/100)))
+            
+            patient_mean=mean(ROI);
+            table_mean(line_Patient-2,line+1)={patient_mean};
+            
+%             
+%             patient_median= median(ROI);
+%             table_median(line_Patient-2,line+1)={patient_median};
+%             
+%             patient_std=std(ROI);
+%             table_std(line_Patient-2,line+1)={patient_std};
+        
+        end
+        
+    end
+end
+%filename='CBF_mean.xlsx';
+%xlswrite(filename,table_mean);
+%k=make_nii(ak(:,:,:));
+%save_nii(k, ('fafaf123.nii'));
